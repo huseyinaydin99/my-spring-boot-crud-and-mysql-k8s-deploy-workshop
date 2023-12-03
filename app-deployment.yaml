@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-boot-mysql-deployment
+spec:
+  selector:
+    matchLabels:
+      app: spring-boot-k8s-mysql
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: spring-boot-k8s-mysql
+    spec:
+      containers:
+        - name: spring-boot-mysql-k8s-3
+          image: spring-boot-mysql-k8s-3:latest
+          ports:
+            - containerPort: 8084
+          env:   # Setting Enviornmental Variables
+            - name: DB_HOST   # Setting Database host address from configMap
+              value: localhost:3306
+            - name: DB_NAME  # Setting Database name from configMap
+              value: huseyin_aydin_db
+            - name: DB_USERNAME  # Setting Database username from Secret
+              value: root
+            - name: DB_PASSWORD # Setting Database password from Secret
+              value: toor
+
+---
+
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: spring-boot-mysql-svc
+spec:
+  selector:
+    app: spring-boot-k8s-mysql
+  ports:
+    - protocol: "TCP"
+      port: 8084 # The port that the service is running on in the cluster
+      targetPort: 8084 # The port exposed by the service
+  type: NodePort # type of the service.
